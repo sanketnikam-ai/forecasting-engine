@@ -1,0 +1,25 @@
+# Simple Dockerfile for Forecasting Engine
+# Use this if the main Dockerfile has issues
+
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && apt-get install -y gcc g++ curl && rm -rf /var/lib/apt/lists/*
+
+# Copy everything
+COPY . .
+
+# Install Python packages
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_web.txt
+
+# Create directories
+RUN mkdir -p uploads results
+
+EXPOSE 5000
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "300", "app:app"]
